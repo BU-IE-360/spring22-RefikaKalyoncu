@@ -236,4 +236,4 @@ corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt")
 
 # Appendices
 
- - *1.* [Rmd file]() for the report.
+ - *1.* [Rmd file](https://github.com/BU-IE-360/spring22-RefikaKalyoncu/blob/gh-pages/Refika_Kalyoncu_HW1.Rmd) for the report.
