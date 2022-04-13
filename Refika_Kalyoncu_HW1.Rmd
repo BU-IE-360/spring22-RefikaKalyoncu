@@ -228,6 +228,8 @@ ggplot(data,aes(x=Date))+
 
 ```
 
+The rise in the data of houses for sale in the middle of 2020 may be due to the fact that everyone returns to online life with the emergence of covid and therefore changes location. Apart from this, it is observed that the data tends to increase in general.\
+
 Before examining the data I thought that as house prices increased, people would search less for homes for sale.However the correlation between price index and the Google trend data shows exactly the opposite. The correlation value between housing price index and "home for sale" search is 0.86. Which shows the data is highly correlated in a positive manner. So,it seems that as the price increases people tend to search more for apartments for sale. This could be as a result of not being able to find an affordable house, people search for a house for much longer time.Therefore the amount of searching for the "Satılık daire" may be increasing.Since the exchange rate and housing interest rate is positively correlated with price index ,it is not surprising that "home for sale" search has also positive correlation with others as well.One can see the correlation values below:
 
 ```{r message=FALSE,warning=FALSE}
