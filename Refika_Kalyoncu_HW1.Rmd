@@ -70,10 +70,10 @@ ggplot(data,aes(x=Date))+
   ggtitle("Time Series of Housing Price Index",
           subtitle="Between the Years 2013-2021")
 ```
-  The monthly plots of Exchange Rate , Housing Interest rate and Housing Price index can be seen in above. We can observe that exchange rate and price index are increasing exponentially and neither of the 3 data shows a property of seasonality.  \
+  The monthly plots of Exchange Rate , Housing Interest rate and Housing Price index can be seen in above. We can observe that exchange rate and price index are increasing exponentially and neither of the 3 data shows a property of an obvious seasonality.  \
   When we look through the plots directly a relationship between housing price index and exchange rate can be clearly seen. So they should be highly correlated which will be evaluated numerically in below sections. \
   Compared to exchange rate and price index, there are big fluctuations in interest rate. \
-Until late 2018 the interest rate increases with significant fluctuations. In late 2018 it has a big increase due central bank policies. Then in 2019 it decreases sharply. During the pandemic the interest rate decreased as well which may be to diminish the effects of pandemic. \
+Until late 2018 the interest rate increases with significant fluctuations. In late 2018 interest rates has a big increase due central bank policies. Then in 2019 it decreases sharply and also during the pandemic the interest rate decreased as well to diminish the effects of pandemic. \
 
 
 ## Visualization of Time Series on a Single Plot
@@ -109,7 +109,7 @@ data%>%pivot_longer(.,cols=c(N_ExchangeRate_EUR,N_Housing.InterestRate,N_Housing
 
 ```
 
-As one can see price index and exchange rate increases almost smoothly compared to Interest rate. The interest rate is being determined according to the change in economy and also changes in economic policies and they are not applied instantly which maybe the reason of enormous fluctuations. This may be the reason for comparably less correlation. \
+As one can see price index and exchange rate increases almost smoothly compared to Interest rate. The interest rate is being determined according to the change in economy and also changes in economic policies. These changes are not applied instantly according to the other variables and also the appliance once increment and reduction depends on the different policies for each different period which maybe the reason of the enormous fluctuations. 
 
 ## Visualization of Histograms
 
@@ -117,7 +117,7 @@ As one can see price index and exchange rate increases almost smoothly compared 
 ggplot(data, aes(ExchangeRate_EUR))+geom_histogram(bins=10,color="yellow",fill="yellow")+ggtitle("Histogram for Exchange Rates") + xlab("Exchange Rates") + ylab("Density")
 ```
 
-  The exchange rate increases almost exponentially.If we look through the histogram almost half of the data is gathered between the interval of 0-4 and other intervals consist of comparably small portions of data. Which shows that the data was stable between 0-4 for sometime then it started to increase sharply.  
+  The exchange rate increases almost exponentially according to the first plot of exchange rate.If we look through the histogram almost half of the data is gathered between the interval of 0-4 and other intervals consist of comparably small portions of data. Which shows that the data was stable between 0-4 for sometime then it started to increase sharply.  
 
 ```{r}
 ggplot(data, aes(Housing.InterestRate))+geom_histogram(bins=10,color="green",fill="green")+ggtitle("Histogram for Interest Rates") + xlab("Interest Rate") + ylab("Density")
@@ -158,9 +158,10 @@ ggplot(data,aes(x=factor(month(Date)),y=N_Housing.InterestRate))+geom_bar(stat="
 ```
 
 
-When the normalized values of the data considered we can easily see the almost constant increase in price index. \
+When the normalized values of the data considered we can easily see the almost constant increase in price index again in these histograms. \
 Also even though it is not smooth as price index exchange rate also follows an increasing trend.\
-The Housing Interest Rate data doesn't exactly follows a trend however it is tend to increase until 2018 and decreases with the policies in 2019 and covid. It seems to follow a more stable trend in recent year. \
+The Housing Interest Rate data doesn't exactly follows a trend however it is tend to increase until 2018 and decreases with the policies in 2019 and covid as also observed in the first plot. It seems to follow a more stable trend in recent year. \
+According to an article in [cumhuriyet.com](https://www.cumhuriyet.com.tr/) the main reason for the increase in interest rate in late 2018 was the rapid depreciation in the external and internal value of TL and the increasing trend in future risks.
 
 
 ## Visualization of Pairwise Correlations
@@ -175,7 +176,7 @@ corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt")
 
 ```
 
-  The correlation value shows that housing price index and the exchange rate is highly correlated. The perfectly correlated value is 1 and our value is 0.97 which shows almost the perfect correlation.\
+  The correlation value shows that housing price index and the exchange rate is highly correlated. The perfectly correlated value is 1 and our value is 0.97 which shows almost the perfect correlation.There is a tight link between exchange rate and inflation in developing countries such as Turkey. With an increase in the exchange rate, prices increase as inflation increases. That's why the house price index has also increased. So, that explains the high correlation between these 2 data.\
   The correlation value between interest rate and exchange rate is also positive and above 0.5. Which proves that there exist a positive relation between exchange and interest rate which may be due to as exchange rate increases the inflation rate increases so the interest rate. \
 
 
@@ -210,13 +211,23 @@ d%>%
   In here we can observe the correlation between data in combination of 2 for each year. \
   If we look through the first one we can see the correlation between exchange rate and interest rate. The correlation overall was 0.52 and we can observe that correlation in 2013,2014,2015,2017,2018 and 2020 is positive and really close to 1. Other years have negative correlation which is probably the reason why the overall correlation is below other mentioned years. \
   In the second graph we can clearly see the relation between exchange rate and price index. This relation is much more consistent. Mostly the correlation is above 0.5 only in 2014 the correlation is negative. \
-  In the third plot we see an inconsistent and continuously changeable correlation one it's positive one time it's negative. This may be due to the fact that interest rates are determined by central bank and the decisions are not applied instantly so it cannot act directly according to inflation rate.\
+  In the third plot we see an inconsistent and continuously changeable correlation one it's positive one time it's negative. As mentioned above ,this may be due to the fact that interest rates are determined by central bank and the decisions are not applied instantly so it cannot act directly according to inflation rate.\
 
 
 # Google Trend 
 
 I searched for "Satılık daire" in Google trend to see what is the relation between searching for houses and price indexes. \
 My question was **"Are there any relationship between searches of "Home for sale" on Google and Housing Price index, exchange rate or Housing Interest Rate ?**\
+```{r message=FALSE,warning=FALSE}
+
+ggplot(data,aes(x=Date))+
+  geom_line(size=1,color="orange",aes(y=Apartment.for.sale))+
+  theme_ipsum()+
+  ggtitle("Search for 'Satılık Ev'",
+          subtitle="Between the Years 2013-2021")
+
+```
+
 Before examining the data I thought that as house prices increased, people would search less for homes for sale.However the correlation between price index and the Google trend data shows exactly the opposite. The correlation value between housing price index and "home for sale" search is 0.86. Which shows the data is highly correlated in a positive manner. So,it seems that as the price increases people tend to search more for apartments for sale. This could be as a result of not being able to find an affordable house, people search for a house for much longer time.Therefore the amount of searching for the "Satılık daire" may be increasing.Since the exchange rate and housing interest rate is positively correlated with price index ,it is not surprising that "home for sale" search has also positive correlation with others as well.One can see the correlation values below:
 
 ```{r message=FALSE,warning=FALSE}
@@ -224,7 +235,42 @@ cor_numVar <- cor(data[,c(2,3,4,5)], use="pairwise.complete.obs")
 
 corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt")
 
+
+
 ```
+
+## Visualization “Satılık Ev” search vs Others
+
+```{r message=FALSE,warning=FALSE}
+ggplot(data)+
+  geom_point(aes(x=ExchangeRate_EUR,y=Apartment.for.sale, color=as.Date(Date)))+
+  theme_minimal()+
+  labs(x="Exchange Rate EUR/TRY", y="'Satılık Ev' Search over years", color="Year")
+```
+
+
+The positive correlation between exchange rate and "home for sale" search can be clearly seen above as well. 
+
+```{r message=FALSE,warning=FALSE}
+ggplot(data)+
+  geom_point(aes(x=Housing.PriceIndex,y=Apartment.for.sale, color=as.Date(Date)))+
+  theme_minimal()+
+  labs(x="Housing Price Index", y="'Satılık Ev' Search over years", color="Year")
+```
+
+
+One can clearly observe the possible linear line on the above plot between price index and search for "home for sale" thanks to the high positive correlation. 
+
+
+```{r message=FALSE,warning=FALSE}
+ggplot(data)+
+  geom_point(aes(x=Housing.InterestRate,y=Apartment.for.sale, color=as.Date(Date)))+
+  theme_minimal()+
+  labs(x="Housing Interest Rate", y="'Satılık Ev' Search over years", color="Year")
+```
+
+
+Even though the correlation between "home for sale search" and interest rate for housing is only 0.14 one can observe the positive relation from the above plot. Only the values from 20 to 25 seem to break the layout of a linear line. 
 
 # Conclusion
   In this report, exchange rate, interest rate and housing price index believed to be related to each other were analyzed monthly between 2013 and  2021 by visualizing these data and looking at their correlations. They are then normalized to be displayed on a single plot.\
@@ -241,6 +287,7 @@ corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt")
 
 -  [inflation-interest-rate-relationship](https://www.investopedia.com/ask/answers/12/inflation-interest-rate-relationship.asp#:~:text=In%20general%2C%20higher%20interest%20rates,rates%20to%20stimulate%20the%20economy.)
 -  [Definition of inflation rate](https://tr.wikipedia.org/wiki/Enflasyon)
+-  [Why the interest rate increased in late 2018?](https://www.cumhuriyet.com.tr/haber/merkez-bankasi-faizi-neden-artirdi-1082442)
 
 # Appendices
 
