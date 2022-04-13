@@ -272,7 +272,7 @@ ggplot(data)+
 ```
 
 
-Even though the correlation between "home for sale search" and interest rate for housing is only 0.14 one can observe the positive relation from the above plot. Only the values from 20 to 25 seem to break the layout of a linear line. 
+Even though the correlation between "home for sale" search and interest rate for housing is only 0.14 one can observe the positive relation from the above plot. Only the interest rate values from 20 to 25 seem to break the layout of a linear line. 
 
 # Conclusion
   In this report, exchange rate, interest rate and housing price index believed to be related to each other were analyzed monthly between 2013 and  2021 by visualizing these data and looking at their correlations. They are then normalized to be displayed on a single plot.\
