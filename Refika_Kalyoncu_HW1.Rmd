@@ -47,9 +47,7 @@ data<-data%>%rename(Date=Date,
 
 ```
 
-## Analysis with the Real Values 
-
-### Visualization of Time Series
+## Visualization of Time Series
 
 Monthly time series data are given below:
 
@@ -72,91 +70,30 @@ ggplot(data,aes(x=Date))+
   ggtitle("Time Series of Housing Price Index",
           subtitle="Between the Years 2013-2021")
 ```
+  The monthly plots of Exchange Rate , Housing Interest rate and Housing Price index can be seen in above. We can observe that exchange rate and price index are increasing exponentially and neither of the 3 data shows a property of seasonality.  
+  When we look through the plots directly a relationship between housing price index and exchange rate can be clearly seen. So they should be highly correlated which will be evaluated numerically in below sections. 
+  Compared to exchange rate and price index, there are big fluctuations in interest rate. 
+Until late 2018 the interest rate increases with significant fluctuations. In late 2018 it has a big increase due central bank policies. Then in 2019 it decreases sharply. During the pandemic the interest rate decreased as well which may be to diminish the effects of pandemic. 
 
-Even if we look through the plots directly a relationship betweeen housing price index and exchange rate can be clearly seen. So they should be highly correlated. 
-Compared to exchange rate and price index, there are big fluctuations in interest rate. 
-Until late 2018 the interest rate increases with significant fluctuations. In late 2018 it has a big increase due central bank policies. Then in 2019 it decreases sharply. During the pandemic the interest rate decreased as well to diminish the effects of pandemic. 
-
-```{r}
-
-boxplot(data$Housing.PriceIndex,data$Housing.InterestRate,data$ExchangeRate_EUR,xlab = "Parts Per Billion",
-main = "Multiple boxplots for comparision",
-names = c("price index","interest rate","euro"),
-las = 2,
-col = c("orange","red","yellow"),
-border = "brown",
-horizontal = TRUE,
-notch = TRUE)
-
-```
-
-### Visualization of Distributions 
-
-
-```{r message=FALSE,warning=FALSE}
-dist1<-data%>%
-  ggplot(.,aes(x=ExchangeRate_EUR))+
-  geom_density(color="darkgrey",fill="yellow",adjust=1.5, alpha=.4) +
-  theme_ipsum()+
-  ggtitle("Distribution of Exchange Rate Values")
-dist1
-print(paste("Variance of Exchange Rate Values:", var(data$ExchangeRate_EUR)))
-print(paste("Mean of Exchange Rate Values:",mean(data$ExchangeRate_EUR)))
-
-dist1+
-  facet_wrap(~year(Date))
-```
-
+## Visualization of Histograms
 
 ```{r message=FALSE,warning=FALSE}
 ggplot(data, aes(ExchangeRate_EUR))+geom_histogram(bins=10,color="yellow",fill="yellow")+ggtitle("Histogram for Exchange Rates") + xlab("Exchange Rates") + ylab("Density")
 ```
 
-  The exchange rate increases almost exponentially so the variance increases as the time flows.If we look through the histogram almost half of the data is gathered between the interval of 0-4 and other intervals consist of comparably small portions of data. Which shows that the data was stable between 0-4 for sometime then it started to increase sharply.  
-
-```{r message=FALSE,warning=FALSE}
-dist3<-data%>%
-  ggplot(.,aes(x=Housing.InterestRate))+
-  geom_density(color="darkgrey",fill="green",adjust=1.5, alpha=.4) +
-  theme_ipsum()+
-  ggtitle("Distribution of Interest Rate Values")
-dist3
-print(paste("Variance of Interest Rate Values:",var(data$Housing.InterestRate)))
-print(paste("Mean of Interest Rate Values:",mean(data$Housing.InterestRate)))
-
-dist3+
-  facet_wrap(~year(Date))
-```
+  The exchange rate increases almost exponentially.If we look through the histogram almost half of the data is gathered between the interval of 0-4 and other intervals consist of comparably small portions of data. Which shows that the data was stable between 0-4 for sometime then it started to increase sharply.  
 
 ```{r}
 ggplot(data, aes(Housing.InterestRate))+geom_histogram(bins=10,color="green",fill="green")+ggtitle("Histogram for Interest Rates") + xlab("Interest Rate") + ylab("Density")
-```
-????
-
-
-
-```{r message=FALSE,warning=FALSE}
-dist2<-data%>%
-  ggplot(.,aes(x=Housing.PriceIndex))+
-  geom_density(color="darkgrey",fill="purple",adjust=1.5, alpha=.4) +
-  theme_ipsum()+
-  ggtitle("Distribution of Hosing Price Index")
-dist2
-print(paste("Variance of Housing Price Index:",var(data$Housing.PriceIndex)))
-print(paste("Mean of Housing Price Index:",mean(data$Housing.PriceIndex)))
-
-dist2+
-  facet_wrap(~year(Date))
-
 ```
 
 ```{r}
 ggplot(data, aes(Housing.PriceIndex))+geom_histogram(bins=10,color="purple",fill="purple")+ggtitle("Histogram for Housing Price Index") + xlab("Housing Price Index") + ylab("Density")
 ```
 
-??????????????????
+According to the histogram of Price Index it seems that there is an accumulation between 0 and 100.As we can also observe from the plot there is a sharp increase after the value of 100 after late 2018. 
 
-### Visualization of Pairwise Correlations
+## Visualization of Pairwise Correlations
 
 To understand the relationships between the data we can look for the correlation value. 
 
@@ -172,9 +109,7 @@ corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt")
   The correlation value between interest rate and exchange rate is also positive and above 0.5. Which proves that there exist a positive relation between exchange and interest rate which may be due to as exchange rate increases the inflation rate increases so the interest rate. 
 
 
-## Analysis with the Normalized Values 
-
-### Visualization of Time Series
+## Visualization of Time Series on a Single Plot
 
 To compare values on a single plot we are going to normalize the values of our data. To do this we are going to subtract min of each data from the actual value and divide it to max-min value of the data. So that each value will be between zero and 1. 
 
@@ -209,33 +144,36 @@ data%>%pivot_longer(.,cols=c(N_ExchangeRate_EUR,N_Housing.InterestRate,N_Housing
 
 As one can see price index and exchange rate increases almost smoothly compared to Interest rate. The interest rate is being determined according to the change in economy and also changes in economic policies and they are not applied instantly which maybe the reason of enormous fluctuations. This may be the reason for comparably less correlation. 
 
-### Visualization of Distributions
-
-```{r message=FALSE,warning=FALSE}
-norm1<-data%>%pivot_longer(.,cols=c(N_ExchangeRate_EUR,N_Housing.InterestRate,N_Housing.PriceIndex),
-                    names_to="name",
-                    values_to="values")%>%
-  ggplot(.,aes(x=values,y=factor(name),fill=factor(name)))+
-  geom_density_ridges() +
-  labs(color="Normalized Economic Measures",
-       y="Normalized Values")+
-  theme_ipsum()+
-  theme(legend.position = "none")+
-  ggtitle("Distribution of the Normalized Values")
-norm1
-
-print(paste("Variance of the Normalized Exchange Rate:",var(data$N_ExchangeRate_EUR)))
-print(paste("Variance of the Normalized Interest Rate:",var(data$N_Housing.InterestRate)))
-print(paste("Variance of the Normalized Price Index:",var(data$N_Housing.PriceIndex)))
-norm1+
-  facet_wrap(~year(Date))
-
+## Visualization of Monthly Histograms
+```{r}
+ggplot(data,aes(x=factor(month(Date)),y=N_ExchangeRate_EUR))+geom_bar(stat="identity",aes(fill=month(Date)))+facet_wrap(~year(Date))+
+  theme(legend.position = "none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank())+
+  labs(x="Month",title="Histograms of Monthly Change in Exchange Rate in Euro ")+scale_fill_distiller(palette="Set2")
 ```
 
-The variance values are really close. Also we observe that the yearly distribution of exchange and interest rates are so similar. 
+```{r}
+ggplot(data,aes(x=factor(month(Date)),y=N_Housing.PriceIndex))+geom_bar(stat="identity",aes(fill=month(Date)))+facet_wrap(~year(Date))+
+  theme(legend.position = "none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank())+
+  labs(x="Month",title="Histograms of Monthly Change in Housing Price Index ")+scale_fill_distiller(palette="Set2")
+```
 
 
-### Visualization of Pairwise Correlations
+```{r}
+ggplot(data,aes(x=factor(month(Date)),y=N_Housing.InterestRate))+geom_bar(stat="identity",aes(fill=month(Date)))+facet_wrap(~year(Date))+
+  theme(legend.position = "none",
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank())+
+  labs(x="Month",title="Histograms of Monthly Change in Interest Rate ")+scale_fill_distiller(palette="Set2")
+```
+When the normalized values of the data considered we can easily see the almost constant increase in price index. 
+Also even though it is not smooth as price index exchange rate also follows an increasing trend.
+The Housing Interest Rate data doesn't exactly follows a trend however it is tend to increase until 2018 and decreases with the policies in 2019 and covid. It seems to follow a more stable trend in recent year. 
+
+## Visualization of Pairwise Correlations
 
 ```{r message=FALSE,warning=FALSE}
 d<-data%>%group_by(year(Date))%>%
@@ -263,12 +201,15 @@ d%>%
 
 ```
 
-YORUM!!!
+  In here we can observe the correlation between data in combination of 2 for each year. 
+  If we look through the first one we can see the correlation between exchange rate and interest rate. The correlation overall was 0.52 and we can observe that correlation in 2013,2014,2015,2017,2018 and 2020 is positive and really close to 1. Other years have negative correlation which is probably the reason why the overall correlation is below other mentioned years. 
+  In the second graph we can clearly see the relation between exchange rate and price index. This relation is much more consistent. Mosly the correlation is above 0.5 only in 2014 the correlation is negative. 
+  In the third plot we see an inconsistent and continuosly changeable correlation one it's positive one time it's negative. This may be due to the fact that interest rates are determined by central bank and the decisions are not applied instatntly so it cannot act directly according to inflation rate.
 
 
 # Google Trend 
 
-I searched for "Satılık daire" in Google trend to see what is the relation between searching for houses and price indexes. It seems that as the price increases people tend to search more for apartments for sale. As a result of not being able to find an affordable house, people search for a house for much longer time.Therefore the amount of searching for the "Satılık daire" may be increasing. 
+I searched for "Satılık daire" in Google trend to see what is the relation between searching for houses and price indexes. Before examining the data I thought that as house prices increased, people would search less for homes for sale.However the correlation between price index and the google trend data shows exactly the opposite. The correlation value is 0.86. Which shows the data is highly correlated in a positive manner. So,it seems that as the price increases people tend to search more for apartments for sale. This could be as a result of not being able to find an affordable house, people search for a house for much longer time.Therefore the amount of searching for the "Satılık daire" may be increasing. 
 
 ```{r message=FALSE,warning=FALSE}
 cor_numVar <- cor(data[,c(2,3,4,5)], use="pairwise.complete.obs") 
@@ -286,6 +227,7 @@ corrplot.mixed(cor_numVar, tl.col="black", tl.pos = "lt")
 -The interest rate showed a much more fluctuating trend compared to the other 2 data.
 -When we look at the correlation for each year, there is a continuous positive correlation between the price index and the exchange rate, except for 2014. On the other hand, although the relationship between exchange rates and interest rates is positive in total, there is a negative correlation in 2016-2019 and 2022.
 -The correlation between the price index and the interest rate is constantly changing.
+-The searches about "home for sale" is positively correlated with the housing price index as well as exchange rate. TThis may be due to the fact that the process of finding a house is getting longer as the price increases and the purchasing power decreases.
 
 # References
 
