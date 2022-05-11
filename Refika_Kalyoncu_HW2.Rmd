@@ -342,3 +342,6 @@ prediction
 
 I concluded that best regression model between the models I tried is the one which includes Lag 1 and some of the variables which are considered as significant in the model. To obtain this model I used Backward Selection and eliminate each variable with the highest p-value until all the variables become significant. Then I predicted the sales in 2007 using this model. However, this model has one drawback. Since we use lag 1 while predicting the data I had to use predictions for prediction Q2,Q3 and Q4 in 2007 which decreases the rate reliability. 
 
+# Appendices
+
+ - *1.* [Rmd file](https://github.com/BU-IE-360/spring22-RefikaKalyoncu/blob/gh-pages/Refika_Kalyoncu_HW2.Rmd) for the report.
