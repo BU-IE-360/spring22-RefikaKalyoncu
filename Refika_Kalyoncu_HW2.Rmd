@@ -313,6 +313,9 @@ tmp[,residual_lag1:=actual-predicted_lag1]
 checkresiduals(lm_model2$residuals)
 ```
 
+
+As I also mentioned above, we can observe that the variance is close to being constant, the mean is close to zero and being normally distributed and there is no obvious trend or seasonality in residuals. All these indicate stationarity of the model.  
+
 ```{r message=FALSE, warning=FALSE}
 mean = mean(lm_model2$residuals)
 paste("Mean of the residuals:",mean)
