@@ -79,24 +79,6 @@ colnames(gasSale)= c("Quarter","UGS","RNUV","NLPG","PU","PG","NUGV","NDGV","GNPA
 
 I shorten the names of the columns for ease of coding and named the year columns as Year and the column which only gives the quarters as Q. 
 
-## Adding New Variables 
-### Trend 
-
-```{r}
-gasSale[,trend:=1:.N]
-```
-
-
-I added a trend column which contains increasing numbers from 1 to N to explain the property of trend. 
-
-### Lagged Variables
-
-```{r message=FALSE, warning=FALSE}
-gasSale[,lag1:=shift(gasSale$UGS,1)]
-```
-
-I added the lagged variable:Lag 1.
-
 
 # Data Visualization
 
@@ -138,6 +120,25 @@ There also exist a strong correlation between the 1st lag that shows that the sa
 
 
 # Model Comparison
+
+## Adding New Variables 
+### Trend 
+
+```{r}
+gasSale[,trend:=1:.N]
+```
+
+
+I added a trend column which contains increasing numbers from 1 to N to explain the property of trend. 
+
+### Lagged Variables
+
+```{r message=FALSE, warning=FALSE}
+gasSale[,lag1:=shift(gasSale$UGS,1)]
+```
+
+I added the lagged variable:Lag 1.
+
 ## MODEL 0: with only Trend
 
 ```{r message=FALSE, warning=FALSE}
