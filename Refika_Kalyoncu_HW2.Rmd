@@ -1,0 +1,344 @@
+---
+title: "IE360 Spring 2022"
+author: "Refika Kalyoncu"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+    number_sections: yes
+    code_folding: hide
+    theme: readable
+subtitle: Homework 2
+---
+```{r message=FALSE, warning=FALSE}
+
+```
+# Introduction
+
+The data we have includes a distributor's quarterly gasoline and diesel sales between 2000 and 2006 and potential independent variables. These variables are summarized as follows:\
+UGS: Unleaded gasoline sales in a given quarter,\
+RNUV: Index showing the rate of new unleaded gasoline vehicles added to the traffic in a quarter,\
+PU: Average price of one liter of unleaded gasoline per quarter (adjusted by index),\
+PG: Average price of one liter of diesel gasoline per quarter (adjusted by an index),\
+NUGV: Number of unleaded gasoline driving in traffic,\
+NDGV: Number of diesel fuel vehicles driving in traffic (per 1000 people),\
+GNPA: agricultural component of Gross National Product (adjusted by index),\
+GNPC: Trade component of Gross National Product (adjusted by an index),\
+GNP: The grand total for GNP (the sum of agriculture, trade and other components).\
+In this homework we will visualize the time series of unleaded gasoline sales(UGS) and try to come up with a model which can explain the behaviour of UGS in best way possible. \
+Then we will explain why the model is significant by representing all the statistical evidence. \
+In the end unleaded gasoline sales for 2007 will be forecasted. 
+
+# Data Gathering and Manipulations
+
+```{r message=FALSE, warning=FALSE}
+require(data.table)
+library(stringr)
+require(xlsx)
+library(lubridate)
+library(zoo)
+library(ggplot2)
+library(RcppRoll)
+library(GGally)
+library(skimr)
+library(forecast)
+library(dplyr)
+```
+I imported the libraries which I'll need. 
+
+```{r message=FALSE, warning=FALSE}
+
+data_path='C:/Users/HP/Desktop/IE360/Homeworks/HW2/IE360_Spring22_HW2_data.csv'
+gasSale=fread(data_path)
+gasSale=as.data.frame(apply(gasSale,2,function(x)gsub('\\s+', '',x)))
+gasSale[,2]=as.numeric(as.character(gasSale[,2]))
+gasSale[,3]=as.numeric(as.character(gasSale[,3]))       
+gasSale[,4]=as.numeric(as.character(gasSale[,4]))
+gasSale[,5]=as.numeric(as.character(gasSale[,5])) 
+gasSale[,6]=as.numeric(as.character(gasSale[,6]))
+gasSale[,7]=as.numeric(as.character(gasSale[,7]))       
+gasSale[,8]=as.numeric(as.character(gasSale[,8]))
+gasSale[,9]=as.numeric(as.character(gasSale[,9])) 
+gasSale[,10]=as.numeric(as.character(gasSale[,10]))
+gasSale[,11]=as.numeric(as.character(gasSale[,11])) 
+gasSale[,12:13]=data.frame(str_split_fixed(gasSale[,1], "_", 2))
+gasSale[,12]=as.numeric(as.character(gasSale[,12]))
+
+str(gasSale)
+
+setDT(gasSale)
+
+```
+I changed the data types of the columns to numeric. To do that I first turned gasSale into data frame and then I revert it to data.table again after the change of data types. \
+The column Quarter includes the year and the quarter of the data. However to observe the effects of year and quarter separately I created 2 different columns for year and the quarter called as "Year" and "Q". \
+
+```{r message=FALSE, warning=FALSE}
+colnames(gasSale)= c("Quarter","UGS","RNUV","NLPG","PU","PG","NUGV","NDGV","GNPA","GNPC","GNP","Year","Q")
+```
+
+I shorten the names of the columns for ease of coding and named the year columns as Year and the column which only gives the quarters as Q. 
+
+## Adding New Variables 
+### Trend 
+
+```{r}
+gasSale[,trend:=1:.N]
+```
+
+
+I added a trend column which contains increasing numbers from 1 to N to explain the property of trend. 
+
+### Lagged Variables
+
+```{r message=FALSE, warning=FALSE}
+gasSale[,lag1:=shift(gasSale$UGS,1)]
+```
+
+I added the lagged variable:Lag 1.
+
+
+# Data Visualization
+
+```{r message=FALSE, warning=FALSE}
+require(ggplot2)
+ggplot(gasSale,aes(x=Quarter,y=UGS, group=1)) +  geom_point() +geom_line()
+```
+
+As you can see from the above time series, there is a clear sign of seasonality. Also we can clearly observe a decreasing trend between years. So, the time series is not stationary due to seasonality and trend. Each year the use of gasoline is relatively higher in 3rd Quarter and gasoline is mostly sold the least in the first quarter each year. \
+
+```{r message=FALSE, warning=FALSE}
+mean_series=roll_mean(gasSale$UGS[1:28],4,align='left')
+var_series=roll_var(gasSale$UGS[1:28],4,align='left')
+plot(mean_series,
+     type='l',col='red',
+     xlab = "time (t)",
+     ylab = "Rolling Mean",
+     main = "Mean series")
+
+plot(var_series,
+     type='l',col='red',
+     xlab = "time (t)",
+     ylab = "Rolling Variance",
+     main = "Variance series")
+```
+
+As one can observe the mean is tend to decrease which shows non-stationarity data and indicates that there exists a trend. If we observe the variance it seems that it is more stationary we cannot observe a clear sign of non-stationarity.\
+
+# Autocorrelation
+
+```{r message=FALSE, warning=FALSE}
+acf(gasSale$UGS,na.action = na.pass)
+```
+
+There exist a strong autocorrelation with lag 4,8 due to seasonality. The correlation between same quarter, different years is obviously higher than the correlation with others. \
+There also exist a strong correlation between the 1st lag that shows that the sale of gasoline is correlated with previous quarter's sales.  
+
+
+
+
+# Model Comparison
+## MODEL 0: with only Trend
+
+```{r message=FALSE, warning=FALSE}
+lm_base=lm(UGS~trend,gasSale)
+summary(lm_base)
+```
+
+Model was to predict the UGS value by only looking through the trend line. As it is expected it wasnt a good model with 0.4552 Adjusted R squared value. \
+
+```{r message=FALSE, warning=FALSE}
+require(forecast)
+checkresiduals(lm_base$residuals)
+```
+```{r message=FALSE, warning=FALSE}
+tmp=copy(gasSale)
+tmp[,actual:=UGS]
+tmp[,predicted_trend:=predict(lm_base,tmp)]
+tmp[,residual_trend:=actual-predicted_trend]
+#head(tmp)
+ggplot(tmp ,aes(x=Quarter)) +
+        geom_line(aes(y=actual,color='real'),group=1) + 
+        geom_line(aes(y=predicted_trend,color='predicted'),group=1)
+```
+
+Also, as we can see from the graph above the model doesn't considers the zigzags bıt only predicts a straight line since it doesn't considers the seasonality. \
+
+```{r message=FALSE, warning=FALSE}
+acf(tmp$residual_trend,na.action = na.pass)
+```
+
+If we look through the ACF graph we can also see that it has high correlations with lag2,4,6,8,10,12 and 14.\
+
+
+## MODEL 1: Trend line, Quarters and Given Variables
+
+
+Then I added all the variables given in the original .csv file. It has a really high adjusted R squared value compared to previous 2 models but as one can observe according to p values most of the variables are not considered as significant so I started to eliminate them according to p values using Backward Selection. \
+
+```{r message=FALSE, warning=FALSE}
+
+lm_model1=lm(UGS~trend+Q+RNUV+NLPG+PU+PG+NUGV+NDGV+GNPA+GNPC+GNP+Year,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+```
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~trend+Q+RNUV+NLPG+PU+PG+NUGV+NDGV+GNPA+GNPC+Year,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+``` 
+Eliminated GNP, which was the one with highest p-value.
+
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~trend+Q+RNUV+NLPG+PG+NUGV+NDGV+GNPA+GNPC+Year,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+``` 
+I eliminated PU with highest p value. 
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~trend+Q+RNUV+NLPG+PG+NUGV+NDGV+GNPA+Year,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+``` 
+Then GNPC is eliminated however there still exists insignificant variables according to model.
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~trend+Q+NLPG+PG+NUGV+NDGV+GNPA+Year,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+```
+RNUV is eliminated who has the highest p-value.
+
+
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~trend+Q+NLPG+PG+NUGV+NDGV+Year,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+```
+GNPA is eliminated since it had the highest p value however the p-value of variable trend and NLPG is still higher than required. 
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~Q+NLPG+PG+NUGV+NDGV+Year,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+```
+
+Trend is eliminated.
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~Q+NLPG+PG+NUGV+NDGV,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+
+```
+Year is eliminated.
+
+```{r message=FALSE, warning=FALSE}
+lm_model1=lm(UGS~Q+PG+NUGV+NDGV,gasSale)
+summary(lm_model1)
+tmp[,actual:=UGS]
+tmp[,predicted_trend_quarter_vars:=predict(lm_model1,tmp)]
+tmp[,residual_trend_quarter_vars:=actual-predicted_trend_quarter_vars]
+
+```
+Now all variables are significant enough so I stopped. 
+```{r message=FALSE, warning=FALSE}
+
+checkresiduals(lm_model1$residuals)
+```
+
+
+
+İf we check the residuals we can observe a slightly increase in variance and also there exist a high correlation with lag1. 
+
+
+## MODEL 2: Adding Lag 1 to MODEL 1
+
+```{r message=FALSE, warning=FALSE}
+lm_model2=lm(UGS~Q+PG+NUGV+NDGV+lag1,gasSale)
+summary(lm_model2)
+tmp[,actual:=UGS]
+tmp[,predicted_lag1:=predict(lm_model2,tmp)]
+tmp[,residual_lag1:=actual-predicted_lag1]
+```
+Since there was a high correlation in with lag 1 in previous model, I added lag1 as a variable. Adjusted R2 is increased from 0.9592 to 0.961 as you can see above and also the correlation is eliminated you can see below. Now we have a better ACF graph as we want and also variance looks like it is constant and distribution is closed to normal. 
+
+```{r message=FALSE, warning=FALSE}
+
+checkresiduals(lm_model2$residuals)
+```
+```{r message=FALSE, warning=FALSE}
+mean = mean(lm_model2$residuals)
+paste("Mean of the residuals:",mean)
+```
+And also as you can see above mean is almost 0 in our model 2. 
+
+## Visualizing the result of all models 
+
+```{r message=FALSE, warning=FALSE}
+ggplot(tmp ,aes(x=Quarter)) +
+        geom_line(aes(y=actual,color='real'),group=1) + 
+        geom_line(aes(y=predicted_trend,color='predicted_trend'),group=1) + 
+        geom_line(aes(y=predicted_lag1,color='predicted_lag1'),group=1)+
+        geom_line(aes(y=predicted_trend_quarter_vars,color='predicted_trend_quarter_vars'),group=1)
+```
+
+## Selected Model
+Selected Model is Model 2. Which takes the variables Q,PG,NUGV,NDGV,lag1 into account to guess UGS
+```{r message=FALSE, warning=FALSE}
+lm_model2=lm(UGS~Q+PG+NUGV+NDGV+lag1,gasSale)
+summary(lm_model2)
+tmp[,actual:=UGS]
+tmp[,predicted_lag1:=predict(lm_model2,tmp)]
+tmp[,residual_lag1:=actual-predicted_lag1]
+```
+
+# Presenting the selected model 
+
+```{r message=FALSE, warning=FALSE}
+
+checkresiduals(lm_model2$residuals)
+```
+
+```{r message=FALSE, warning=FALSE}
+mean = mean(lm_model2$residuals)
+paste("Mean of the residuals:",mean)
+```
+
+## The prediction visualization compared to real data:
+```{r message=FALSE, warning=FALSE}
+ggplot(tmp ,aes(x=Quarter)) +
+        geom_line(aes(y=actual,color='real'),group=1) + 
+        geom_line(aes(y=predicted_lag1,color='predicted'),group=1)
+```
+
+# 2007 Predictions
+The prediction for year 2007 is done below. Since we don't have the previous lagged value for the predictions on Q2,3 and 4, I added the predictions into the next row each time. 
+
+```{r message=FALSE, warning=FALSE}
+set2007= gasSale[29:32,c("Q","PG","NUGV","NDGV","lag1")]
+prediction = c(0,0,0,0)
+for(i in 1:4) {
+  prediction[i] = predict(lm_model2,newdata = set2007[i,])
+  if(i<4){set2007[i+1,"lag1"] = prediction[i] }
+}
+prediction
+```
+
+# Conclusion
+
+I concluded that best regression model between the models I tried is the one which includes Lag 1 and some of the variables which are considered as significant in the model. To obtain this model I used Backward Selection and eliminate each variable with the highest p-value until all the variables become significant. Then I predicted the sales in 2007 using this model. However, this model has one drawback. Since we use lag 1 while predicting the data I had to use predictions for prediction Q2,Q3 and Q4 in 2007 which decreases the rate reliability. 
+
