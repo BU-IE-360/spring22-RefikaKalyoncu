@@ -17,3 +17,4 @@ You can reach the rmd file from [here](https://github.com/BU-IE-360/spring22-Ref
 
 [Here](https://bu-ie-360.github.io/spring22-RefikaKalyoncu/PROJE360C_R_C.html) is my HTML file.<br>
 You can reach the rmd file from [here](https://github.com/BU-IE-360/spring22-RefikaKalyoncu/blob/gh-pages/SON.Rmd) <br>
+[Click to see the pdf](https://github.com/BU-IE-360/spring22-RefikaKalyoncu/blob/gh-pages/pdf_IE360.pdf)<br>
